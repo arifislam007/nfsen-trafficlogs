@@ -1,0 +1,58 @@
+services:
+  nfcapd:
+    build: ./nfcapd-build
+    container_name: mikrotik-nfcapd
+    restart: unless-stopped
+    command: ["-p", "2055", "-w", "/data", "-t", "300"]
+    ports:
+      - "2055:2055/udp"
+    volumes:
+      - ./flows/live/mikrotik:/data
+    mem_limit: 128m
+    networks:
+      - mikrotik-logs-net
+
+  nfsen:
+    image: ghcr.io/mbolli/nfsen-ng:latest
+    container_name: mikrotik-nfsen
+    restart: unless-stopped
+    depends_on:
+      - nfcapd
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./flows:/data/nfsen-ng
+      - nfsen-data:/var/lib/nfsen-ng
+    environment:
+      - TZ=UTC
+      - NFSEN_SOURCES=mikrotik
+      - NFSEN_PORTS=80,443,53
+      - NFSEN_NFDUMP_BINARY=/usr/local/nfdump/bin/nfdump
+      - NFSEN_NFDUMP_PROFILES=/data/nfsen-ng
+    mem_limit: 512m
+    networks:
+      - mikrotik-logs-net
+
+  rsyslog:
+    build: ./rsyslog-build
+    container_name: mikrotik-rsyslog
+    restart: unless-stopped
+    ports:
+      - "514:514/udp"
+      - "514:514/tcp"
+    volumes:
+      - ./syslog:/var/log/remote
+      - ./rsyslog.conf:/etc/rsyslog.conf:ro
+    mem_limit: 128m
+    networks:
+      - mikrotik-logs-net
+
+networks:
+  mikrotik-logs-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.250.250.0/24
+
+volumes:
+  nfsen-data:
