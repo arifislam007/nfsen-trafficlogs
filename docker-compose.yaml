@@ -19,7 +19,7 @@ services:
     depends_on:
       - nfcapd
     ports:
-      - "9000:9000"
+      - "8999:9000"
     volumes:
       - ./flows:/data/nfsen-ng
       - nfsen-data:/var/lib/nfsen-ng
