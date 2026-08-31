@@ -1,0 +1,9 @@
+# Runtime data — never commit captured flow/syslog data or nfsen-ng state.
+# These are large, constantly-changing binary files written by the running
+# containers, not source/config. Committing them bloats the repo and causes
+# pull conflicts every time nfcapd rotates a file.
+flows/
+syslog/
+*.rrd
+*.log
+*.log.xz
