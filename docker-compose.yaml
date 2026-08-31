@@ -3,7 +3,7 @@ services:
     build: ./nfcapd-build
     container_name: mikrotik-nfcapd
     restart: unless-stopped
-    command: ["-p", "2055", "-w", "/data", "-t", "300", "-S", "%Y/%m/%d"]
+    command: ["-p", "2055", "-w", "/data", "-t", "300", "-S", "1"]
     ports:
       - "2055:2055/udp"
     volumes:
@@ -24,12 +24,14 @@ services:
       - ./flows:/data/nfsen-ng
       - nfsen-data:/var/lib/nfsen-ng
     environment:
-      - TZ=UTC
+      - TZ=Asia/Dhaka
+      - NFCAPD_TZ=UTC
       - NFSEN_SOURCES=mikrotik
       - NFSEN_PORTS=80,443,53
       - NFSEN_NFDUMP_BINARY=/usr/local/nfdump/bin/nfdump
       - NFSEN_NFDUMP_PROFILES=/data/nfsen-ng
-    mem_limit: 512m
+      - NFSEN_NFDUMP_MAX_PROCESSES=4
+    mem_limit: 2g
     networks:
       - mikrotik-logs-net
 

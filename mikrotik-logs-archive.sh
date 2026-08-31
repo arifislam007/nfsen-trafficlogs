@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-BASE_DIR="/data/mikrotik-logs"
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FLOWS_DIR="$BASE_DIR/flows"
 FLOWS_LIVE_DIR="$FLOWS_DIR/live/mikrotik"   # nfsen-ng's active source tree; keep archived files out of it
 SYSLOG_DIR="$BASE_DIR/syslog"

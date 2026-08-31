@@ -10,7 +10,7 @@
 
 set -euo pipefail
 
-BASE_DIR="/data/mikrotik-logs"
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FLOWS_LIVE_DIR="$BASE_DIR/flows/live/mikrotik"
 
 shopt -s nullglob
