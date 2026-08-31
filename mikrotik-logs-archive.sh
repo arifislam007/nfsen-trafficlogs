@@ -14,17 +14,25 @@ LOG_FILE="$BASE_DIR/archive.log"
 
 TARGET_DATE=$(date -d "yesterday" +%Y%m%d)          # e.g. 20260827
 TARGET_DATE_DASHED=$(date -d "yesterday" +%Y-%m-%d) # e.g. 2026-08-27
+TARGET_YEAR=$(date -d "yesterday" +%Y)
+TARGET_MONTH=$(date -d "yesterday" +%m)
+TARGET_DAY=$(date -d "yesterday" +%d)
 
 log() { echo "$(date '+%F %T') $*" >> "$LOG_FILE"; }
 
 log "=== Archive run started for $TARGET_DATE_DASHED ==="
 
 ### 1. Archive & compress NetFlow (nfcapd) files ###
+# nfcapd writes into live/mikrotik/<YYYY>/<MM>/<DD>/ (see -S "%Y/%m/%d" in
+# docker-compose.yaml) — that layout is required for nfsen-ng's importer to
+# find files. Archive pulls yesterday's whole day dir out of the live tree.
 DEST_DIR="$FLOWS_DIR/$TARGET_DATE_DASHED"
 mkdir -p "$DEST_DIR"
 
+SOURCE_DAY_DIR="$FLOWS_LIVE_DIR/$TARGET_YEAR/$TARGET_MONTH/$TARGET_DAY"
+
 shopt -s nullglob
-FILES=("$FLOWS_LIVE_DIR"/nfcapd."$TARGET_DATE"*)
+FILES=("$SOURCE_DAY_DIR"/nfcapd.*)
 shopt -u nullglob
 
 if [ ${#FILES[@]} -eq 0 ]; then
@@ -37,6 +45,8 @@ else
         moved=$((moved+1))
     done
     log "Moved $moved flow files into $DEST_DIR"
+    # clean up the now-empty date dir so it doesn't linger in the live tree
+    rmdir --ignore-fail-on-non-empty "$SOURCE_DAY_DIR" "$FLOWS_LIVE_DIR/$TARGET_YEAR/$TARGET_MONTH" "$FLOWS_LIVE_DIR/$TARGET_YEAR" 2>/dev/null || true
 fi
 
 # Compression always runs over whatever is in DEST_DIR, independent of the

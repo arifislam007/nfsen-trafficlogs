@@ -3,7 +3,7 @@ services:
     build: ./nfcapd-build
     container_name: mikrotik-nfcapd
     restart: unless-stopped
-    command: ["-p", "2055", "-w", "/data", "-t", "300"]
+    command: ["-p", "2055", "-w", "/data", "-t", "300", "-S", "%Y/%m/%d"]
     ports:
       - "2055:2055/udp"
     volumes:
